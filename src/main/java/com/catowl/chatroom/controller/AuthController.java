@@ -1,5 +1,7 @@
 package com.catowl.chatroom.controller;
 
+import com.catowl.chatroom.exception.BusinessException;
+import com.catowl.chatroom.exception.ExceptionEnum;
 import com.catowl.chatroom.model.DTO.request.LoginRequest;
 import com.catowl.chatroom.model.DTO.request.RegisterRequest;
 import com.catowl.chatroom.model.DTO.response.LoginResponse;
@@ -48,14 +50,17 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResultResponse<RefreshResponse> refresh(@CookieValue(name = REFRESH_TOKEN_COOKIE_NAME) String refreshToken){
+    public ResultResponse<RefreshResponse> refresh(@CookieValue(name = REFRESH_TOKEN_COOKIE_NAME, required = false) String refreshToken){
+        if (refreshToken == null) {
+            throw new BusinessException(ExceptionEnum.TOKEN_NOT_PROVIDED);
+        }
         String newAccessToken = authService.refreshAccessToken(refreshToken);
         return ResultResponse.success(new RefreshResponse(newAccessToken));
     }
 
     @PostMapping("/logout")
-    public ResultResponse<String> logout(HttpServletResponse response){
-        authService.logout();
+    public ResultResponse<String> logout(@CookieValue(name = REFRESH_TOKEN_COOKIE_NAME, required = false) String refreshToken, HttpServletResponse response){
+        authService.logout(refreshToken);
         CookieUtil.clearCookie(response, REFRESH_TOKEN_COOKIE_NAME);
         return ResultResponse.success();
     }

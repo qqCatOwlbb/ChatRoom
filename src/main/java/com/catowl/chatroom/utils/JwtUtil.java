@@ -79,22 +79,6 @@ public class JwtUtil {
     }
 
     /**
-    * @Description: 生成refresh-token
-    * @Param: [userId]
-    * @return: java.lang.String
-    * @Author: qqCatOwlbb
-    * @Date: 2025/11/14
-    */
-    public String generateRefreshToken(Long userId) {
-        return Jwts.builder()
-                .setSubject(String.valueOf(userId))
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpirationMs))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-    }
-
-    /**
     * @Description: 解析token，获取所有的claims
     * @Param: [token]
     * @return: io.jsonwebtoken.Claims

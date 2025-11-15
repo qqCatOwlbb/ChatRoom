@@ -40,14 +40,14 @@ public interface AuthService {
     */
     LoginResult login(LoginRequest loginRequest);
     
-    /** 
-    * @Description: 注销
-    * @Param: []
+    /**
+    * @Description: 删除 at
+    * @Param: [refreshToken]
     * @return: void
     * @Author: qqCatOwlbb
     * @Date: 2025/11/15
     */
-    void logout();
+    void logout(String refreshToken);
 
     /**
     * @Description: 刷新 AccessToken

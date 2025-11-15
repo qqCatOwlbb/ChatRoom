@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
     */
     @ExceptionHandler(value = ServerException.class)
     public ResultResponse<String> ServerExceptionHandler(HttpServletRequest req, ServerException e){
-        logger.error("服务内部异常，{}", e.getErrorInfo().getResultMsg());
+        logger.error("服务内部异常，{}", e);
         return ResultResponse.error(e.getErrorInfo());
     }
 
@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
     */
     @ExceptionHandler(value = NotFoundException.class)
     public ResultResponse<String> NotFoundExceptionHandler(HttpServletRequest req, NotFoundException e){
-        logger.error("资源未找到：{}", e.getErrorInfo().getResultMsg());
+        logger.error("资源未找到：{}", e);
         return ResultResponse.error(e.getErrorInfo());
     }
 
@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
     */
     @ExceptionHandler(value = ForbiddenException.class)
     public ResultResponse<String> ForbiddenExceptionHandler(HttpServletRequest req, ForbiddenException e){
-        logger.error("权限认证异常：{}", e.getErrorInfo().getResultMsg());
+        logger.error("权限认证异常：{}", e);
         return ResultResponse.error(e.getErrorInfo());
     }
     
@@ -67,7 +67,7 @@ public class GlobalExceptionHandler {
     */
     @ExceptionHandler(value = BusinessException.class)
     public ResultResponse<String> BusinessExceptionHandler(HttpServletRequest req, BusinessException e){
-        logger.error("业务逻辑异常：{}", e.getErrorInfo().getResultMsg());
+        logger.error("业务逻辑异常：{}", e);
         return ResultResponse.error(e.getErrorInfo());
     }
 
@@ -80,7 +80,7 @@ public class GlobalExceptionHandler {
     */
     @ExceptionHandler(value = UnauthorizedException.class)
     public ResultResponse<String> UnauthorizedExceptionHandler(HttpServletRequest req, UnauthorizedException e){
-        logger.error("用户未认证！错误信息：{}",e.getErrorInfo().getResultMsg());
+        logger.error("用户未认证！错误信息：{}",e);
         return ResultResponse.error(e.getErrorInfo());
     }
 

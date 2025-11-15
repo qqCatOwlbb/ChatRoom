@@ -14,6 +14,7 @@ import com.catowl.chatroom.service.AuthService;
 import com.catowl.chatroom.utils.JwtUtil;
 import com.catowl.chatroom.utils.RedisCache;
 import com.catowl.chatroom.utils.UlidUtils;
+import io.netty.util.internal.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -25,9 +26,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.beans.Transient;
 import java.net.PasswordAuthentication;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -60,6 +63,8 @@ public class AuthServiceImpl implements AuthService {
     private long refreshTokenExpirationMs;
 
     private static final String REFRESH_TOKEN_KEY_PREFIX = "rt:";
+
+    private static final String USER_SESSIONS_KEY_PREFIX = "refresh_tokens_for_user:";
 
     @Override
     @Transactional
@@ -101,53 +106,49 @@ public class AuthServiceImpl implements AuthService {
                 securityUser.getUser().getId(),
                 securityUser.getAuthorities()
         );
-        String refreshToken = jwtUtil.generateRefreshToken(
-                securityUser.getUser().getId()
-        );
+        String refreshToken = UUID.randomUUID().toString().replace("-","");
+
+        String userIndexKey = USER_SESSIONS_KEY_PREFIX + securityUser.getUser().getId();
 
         redisCache.redisTemplate.opsForValue().set(
-                REFRESH_TOKEN_KEY_PREFIX + securityUser.getUser().getId(),
+                REFRESH_TOKEN_KEY_PREFIX + refreshToken,
                 securityUser,
                 refreshTokenExpirationMs,
                 TimeUnit.MILLISECONDS
         );
 
+        redisCache.redisTemplate.opsForSet().add(userIndexKey, refreshToken);
+        redisCache.expire(userIndexKey, refreshTokenExpirationMs, TimeUnit.MILLISECONDS);
+
         return new LoginResult(accessToken, refreshToken);
     }
 
     @Override
-    public void logout() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof SecurityUser)) {
-            // 如果没有认证信息(比如匿名访问)，或者 Principal 不是 SecurityUser，
-            // 可能是因为 AT 已过期但未被拦截，此时无需任何操作
-            return;
+    public void logout(String refreshToken) {
+        if(!StringUtils.hasText(refreshToken)){
+            throw new BusinessException(ExceptionEnum.TOKEN_NOT_PROVIDED);
         }
-
-        Long userId = (Long) authentication.getPrincipal();
-
-        redisCache.redisTemplate.delete(REFRESH_TOKEN_KEY_PREFIX + userId);
+        String sessionKey = REFRESH_TOKEN_KEY_PREFIX + refreshToken;
+        SecurityUser securityUser = (SecurityUser) redisCache.getCacheObject(sessionKey);
+        redisCache.redisTemplate.delete(sessionKey);
+        if (securityUser != null) {
+            String userIndexKey = USER_SESSIONS_KEY_PREFIX + securityUser.getUser().getId();
+            // 4. 从索引 Set 中移除这个 RT
+            redisCache.redisTemplate.opsForSet().remove(userIndexKey, refreshToken);
+        }
     }
 
 
     @Override
     public String refreshAccessToken(String refreshToken) {
-        if(!jwtUtil.validateToken(refreshToken)){
-            throw new BusinessException(ExceptionEnum.TOKEN_INVALID);
-        }
 
-        Long userId;
-        try{
-            userId = jwtUtil.getUserIdFromClaims(jwtUtil.getClaimsFromToken(refreshToken));
-        }catch (Exception e){
-            throw new BusinessException(ExceptionEnum.TOKEN_INVALID);
-        }
-
-        String redisKey = REFRESH_TOKEN_KEY_PREFIX + userId;
+        String redisKey = REFRESH_TOKEN_KEY_PREFIX + refreshToken;
 
         SecurityUser securityUser = (SecurityUser) redisCache.getCacheObject(redisKey);
         if(securityUser == null){
             throw new BusinessException(ExceptionEnum.TOKEN_INVALID, "会话已失效，请重新登录");
+        }else{
+            System.out.println("找得到"+securityUser.getUser().getId().toString());
         }
 
         String newAccessToken = jwtUtil.generateAccessToken(
@@ -155,6 +156,8 @@ public class AuthServiceImpl implements AuthService {
                 securityUser.getAuthorities()
         );
         redisCache.expire(redisKey, refreshTokenExpirationMs, TimeUnit.MILLISECONDS);
+        String userIndexKey = USER_SESSIONS_KEY_PREFIX + securityUser.getUser().getId();
+        redisCache.expire(userIndexKey, refreshTokenExpirationMs, TimeUnit.MILLISECONDS);
         return newAccessToken;
     }
 

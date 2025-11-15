@@ -1,6 +1,9 @@
 package com.catowl.chatroom.model.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -13,11 +16,17 @@ import java.util.List;
  * @author: qqCatOwlbb
  * @create: 2025-11-15 13:52
  **/
+@Data
 public class SecurityUser implements UserDetails {
     @Getter
     private final User user;
 
     private final Collection<? extends GrantedAuthority> authorities;
+
+    public SecurityUser(){
+        this.user = null;
+        this.authorities = null;
+    };
 
     public SecurityUser(User user, Collection<? extends GrantedAuthority> authorities){
         this.user = user;
