@@ -1,28 +1,26 @@
 package com.catowl.chatroom.exception;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 /**
  * @program: ChatRoom
- * @description: 未认证异常401
+ * @description: 权限异常
  * @author: qqCatOwlbb
- * @create: 2025-11-14 15:16
+ * @create: 2025-11-15 10:58
  **/
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class UnauthorizedException extends RuntimeException {
+public class ForbiddenException extends RuntimeException {
 
     private final BaseErrorInfoInterface errorInfo;
 
-    public UnauthorizedException(BaseErrorInfoInterface errorInfo){
+    public ForbiddenException(BaseErrorInfoInterface errorInfo){
         super(errorInfo.getResultMsg());
         this.errorInfo = errorInfo;
     }
 
-    public UnauthorizedException(BaseErrorInfoInterface errorInfo, String customMessage){
+    public ForbiddenException(BaseErrorInfoInterface errorInfo, String customMessage){
         super(customMessage);
         this.errorInfo = errorInfo;
     }

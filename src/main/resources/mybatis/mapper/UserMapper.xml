@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.catowl.chatroom.mapper.UserMapper">
+    <select id="findByUsername" resultType="com.catowl.chatroom.model.entity.User">
+        SELECT `id`,`ulid`,username,password,`nickname`,`avatar_url`,created_at,status FROM user_account WHERE username = #{username}
+    </select>
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_account
+            (ulid, username, password, nickname, avatar_url, status, created_at)
+        VALUES
+            (#{ulid}, #{username},
+             #{password},
+             #{nickname},
+             #{avatarUrl},
+             #{status},
+             NOW())
+    </insert>
+</mapper>

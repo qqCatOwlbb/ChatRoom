@@ -6,4 +6,7 @@
     <settings>
         <setting name="mapUnderscoreToCamelCase" value="true"/>
     </settings>
+    <typeHandlers>
+        <typeHandler handler="com.catowl.chatroom.config.UlidTypeHandler"/>
+    </typeHandlers>
 </configuration>

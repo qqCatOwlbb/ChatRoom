@@ -1,4 +1,4 @@
-package com.catowl.chatroom.Model.response;
+package com.catowl.chatroom.model.DTO.response;
 
 import com.alibaba.fastjson.JSONObject;
 import com.catowl.chatroom.exception.BaseErrorInfoInterface;

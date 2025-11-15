@@ -109,7 +109,7 @@ public class JwtUtil {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (JwtException | IllegalArgumentException e) {
-            throw new UnauthorizedException(ExceptionEnum.TOKEN_INVALID.getResultCode(),"token 无效或过期");
+            throw new UnauthorizedException(ExceptionEnum.TOKEN_INVALID);
         }
     }
 
@@ -137,7 +137,7 @@ public class JwtUtil {
             getClaimsFromToken(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            throw new UnauthorizedException("refresh-token 无效或过期");
+            throw new UnauthorizedException(ExceptionEnum.TOKEN_INVALID);
         }
     }
 }
