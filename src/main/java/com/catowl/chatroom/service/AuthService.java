@@ -3,6 +3,8 @@ package com.catowl.chatroom.service;
 import com.catowl.chatroom.model.DTO.request.LoginRequest;
 import com.catowl.chatroom.model.DTO.request.RegisterRequest;
 import com.catowl.chatroom.model.DTO.response.LoginResponse;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 /**
  * @program: ChatRoom
@@ -11,6 +13,14 @@ import com.catowl.chatroom.model.DTO.response.LoginResponse;
  * @create: 2025-11-15 15:18
  **/
 public interface AuthService {
+
+    @Data
+    @AllArgsConstructor
+    class LoginResult {
+        private String accessToken;
+        private String refreshToken;
+    }
+
 
     /**
     * @Description: 注册接口
@@ -28,7 +38,7 @@ public interface AuthService {
     * @Author: qqCatOwlbb
     * @Date: 2025/11/15
     */
-    LoginResponse login(LoginRequest loginRequest);
+    LoginResult login(LoginRequest loginRequest);
     
     /** 
     * @Description: 注销

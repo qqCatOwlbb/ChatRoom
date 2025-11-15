@@ -85,7 +85,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public LoginResponse login(LoginRequest loginRequest) {
+    public LoginResult login(LoginRequest loginRequest) {
         Authentication authentication;
         try{
             authentication = authenticationManager.authenticate(
@@ -112,7 +112,7 @@ public class AuthServiceImpl implements AuthService {
                 TimeUnit.MILLISECONDS
         );
 
-        return new LoginResponse(accessToken, refreshToken);
+        return new LoginResult(accessToken, refreshToken);
     }
 
     @Override
@@ -124,11 +124,11 @@ public class AuthServiceImpl implements AuthService {
             return;
         }
 
-        SecurityUser securityUser = (SecurityUser) authentication.getPrincipal();
-        Long userId = securityUser.getUser().getId();
+        Long userId = (Long) authentication.getPrincipal();
 
         redisCache.redisTemplate.delete(REFRESH_TOKEN_KEY_PREFIX + userId);
     }
+
 
     @Override
     public String refreshAccessToken(String refreshToken) {
@@ -138,8 +138,24 @@ public class AuthServiceImpl implements AuthService {
 
         Long userId;
         try{
-            userId = jwtUtil.getUserIdFromClaims(jwtUtil.getClaimsFromToken(refreshToken))
+            userId = jwtUtil.getUserIdFromClaims(jwtUtil.getClaimsFromToken(refreshToken));
+        }catch (Exception e){
+            throw new BusinessException(ExceptionEnum.TOKEN_INVALID);
         }
+
+        String redisKey = REFRESH_TOKEN_KEY_PREFIX + userId;
+
+        SecurityUser securityUser = (SecurityUser) redisCache.getCacheObject(redisKey);
+        if(securityUser == null){
+            throw new BusinessException(ExceptionEnum.TOKEN_INVALID, "会话已失效，请重新登录");
+        }
+
+        String newAccessToken = jwtUtil.generateAccessToken(
+                securityUser.getUser().getId(),
+                securityUser.getAuthorities()
+        );
+        redisCache.expire(redisKey, refreshTokenExpirationMs, TimeUnit.MILLISECONDS);
+        return newAccessToken;
     }
 
 

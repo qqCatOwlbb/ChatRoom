@@ -26,7 +26,7 @@ public class JwtUtil {
 
     // --- 1. 注入的配置 (非静态) ---
 
-    @Value("${jwt.secret}")
+    @Value("${jwt.secret-key}")
     private String secretKeyString;
 
     @Value("${jwt.expiration.access-token}")

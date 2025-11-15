@@ -6,13 +6,13 @@ import lombok.NoArgsConstructor;
 
 /**
  * @program: ChatRoom
- * @description: 登录成功响应体
+ * @description: 刷新 Token 响应体
  * @author: qqCatOwlbb
- * @create: 2025-11-15 15:13
+ * @create: 2025-11-15 16:49
  **/
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginResponse {
+public class RefreshResponse {
     private String accessToken;
 }
