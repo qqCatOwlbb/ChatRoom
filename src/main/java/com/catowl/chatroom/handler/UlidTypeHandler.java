@@ -1,4 +1,4 @@
-package com.catowl.chatroom.config;
+package com.catowl.chatroom.handler;
 
 import com.catowl.chatroom.utils.UlidUtils;
 import org.apache.ibatis.type.BaseTypeHandler;

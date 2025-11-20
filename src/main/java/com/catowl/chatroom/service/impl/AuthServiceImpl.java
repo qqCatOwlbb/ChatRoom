@@ -147,8 +147,6 @@ public class AuthServiceImpl implements AuthService {
         SecurityUser securityUser = (SecurityUser) redisCache.getCacheObject(redisKey);
         if(securityUser == null){
             throw new BusinessException(ExceptionEnum.TOKEN_INVALID, "会话已失效，请重新登录");
-        }else{
-            System.out.println("找得到"+securityUser.getUser().getId().toString());
         }
 
         String newAccessToken = jwtUtil.generateAccessToken(

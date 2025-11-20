@@ -10,7 +10,7 @@
         INSERT INTO user_account
             (ulid, username, password, nickname, avatar_url, status, created_at)
         VALUES
-            (#{ulid, typeHandler=com.catowl.chatroom.config.UlidTypeHandler}, #{username},
+            (#{ulid, typeHandler=com.catowl.chatroom.handler.UlidTypeHandler}, #{username},
              #{password},
              #{nickname},
              #{avatarUrl},

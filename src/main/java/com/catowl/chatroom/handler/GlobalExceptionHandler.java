@@ -1,5 +1,6 @@
-package com.catowl.chatroom.exception;
+package com.catowl.chatroom.handler;
 
+import com.catowl.chatroom.exception.*;
 import com.catowl.chatroom.model.DTO.response.ResultResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
