@@ -4,6 +4,8 @@ import com.catowl.chatroom.model.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * @program: ChatRoom
  * @description: 用户逻辑操作的mapper层
@@ -29,4 +31,6 @@ public interface UserMapper {
     * @Date: 2025/11/15
     */
     int insertUser(User user);
+
+    List<User> selectByIds(List<Long> ids);
 }

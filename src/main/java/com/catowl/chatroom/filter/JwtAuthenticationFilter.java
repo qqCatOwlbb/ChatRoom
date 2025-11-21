@@ -2,6 +2,8 @@ package com.catowl.chatroom.filter;
 
 import com.catowl.chatroom.exception.ExceptionEnum;
 import com.catowl.chatroom.exception.UnauthorizedException;
+import com.catowl.chatroom.model.entity.SecurityUser;
+import com.catowl.chatroom.model.entity.User;
 import com.catowl.chatroom.utils.JwtUtil;
 import com.catowl.chatroom.utils.RedisCache;
 import io.jsonwebtoken.Claims;
@@ -48,6 +50,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throw new UnauthorizedException(ExceptionEnum.TOKEN_INVALID);
         }
         Long userId =Long.parseLong(claims.getSubject());
+        User simpleUser = new User();
+        simpleUser.setId(userId);
         List<String> roles = claims.get("roles", List.class);
         List<GrantedAuthority> authorities = new ArrayList<>();
         if(roles != null){
@@ -55,8 +59,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toList());
         }
+        SecurityUser securityUser = new SecurityUser(simpleUser, authorities);
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(userId, null, authorities);
+                new UsernamePasswordAuthenticationToken(securityUser, null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         filterChain.doFilter(request,response);
     }

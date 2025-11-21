@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.catowl.chatroom.mapper.VideoMapper">
+
+    <sql id="Base_Column_List">
+        id,
+        ulid,
+        uploader_user_id,
+        title,
+        description,
+        video_url,
+        cover_image_url,
+        status,
+        view_count,
+        like_count,
+        audit_notes,
+        auditor_user_id,
+        audited_at,
+        created_at,
+        uploaded_at
+    </sql>
+
+    <insert id="insertVideo" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO video
+        (
+            ulid,
+            uploader_user_id,
+            title,
+            description,
+            video_url,
+            cover_image_url,
+            status,
+            view_count,
+            like_count,
+            created_at,
+            uploaded_at
+        )
+        VALUES
+            (
+                #{ulid, typeHandler=com.catowl.chatroom.handler.UlidTypeHandler},
+                #{uploaderUserId},
+                #{title},
+                #{description},
+                #{videoUrl},
+                #{coverImageUrl},
+                #{status},
+                0,
+                0,
+                NOW(),
+                NOW()
+            )
+    </insert>
+
+    <select id="findById" resultType="com.catowl.chatroom.model.entity.Video">
+        SELECT <include refid="Base_Column_List"/>
+        FROM video
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByUlid" resultType="com.catowl.chatroom.model.entity.Video">
+        SELECT <include refid="Base_Column_List"/>
+        FROM video
+        WHERE ulid = #{ulid, typeHandler=com.catowl.chatroom.handler.UlidTypeHandler}
+    </select>
+
+    <select id="selectByIds" resultType="com.catowl.chatroom.model.entity.Video">
+        SELECT <include refid="Base_Column_List"/>
+        FROM video
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ORDER BY FIELD(id,
+        <foreach collection="ids" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+    </select>
+
+    <select id="findFeedList" resultType="com.catowl.chatroom.model.entity.Video">
+        SELECT <include refid="Base_Column_List"/>
+        FROM video
+        WHERE status = 'approved'
+
+        <if test="title != null and title != ''">
+            AND title LIKE CONCAT('%', #{title}, '%')
+        </if>
+
+        <if test="cursor != null">
+            AND ulid &lt; #{cursor, typeHandler=com.catowl.chatroom.handler.UlidTypeHandler}
+        </if>
+
+        ORDER BY ulid DESC
+        LIMIT #{limit}
+    </select>
+
+    <update id="updateVideo">
+        UPDATE video
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="videoUrl != null">video_url = #{videoUrl},</if>
+            <if test="coverImageUrl != null">cover_image_url = #{coverImageUrl},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="auditNotes != null">audit_notes = #{auditNotes},</if>
+            <if test="auditorUserId != null">auditor_user_id = #{auditorUserId},</if>
+            <if test="auditedAt != null">audited_at = #{auditedAt},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="incrementViewCount">
+        UPDATE video
+        SET view_count = view_count + #{increment}
+        WHERE id = #{id}
+    </update>
+
+    <update id="incrementLikeCount">
+        UPDATE video
+        SET like_count = like_count + #{increment}
+        WHERE id = #{id}
+    </update>
+
+    <update id="decrementLikeCount">
+        UPDATE video
+        SET like_count = CASE
+                             WHEN like_count - #{decrement} &lt; 0 THEN 0
+                             ELSE like_count - #{decrement}
+            END
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM video WHERE id = #{id}
+    </delete>
+
+</mapper>

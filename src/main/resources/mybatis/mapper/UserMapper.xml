@@ -17,4 +17,10 @@
              #{status},
              NOW())
     </insert>
+    <select id="selectByIds" resultType="com.catowl.chatroom.model.entity.User">
+        SELECT id, ulid, nickname, avatar_url FROM user_account WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
 </mapper>

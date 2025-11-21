@@ -37,6 +37,10 @@ public class Video extends BaseEntity{
 
     private Long auditorUserId;
 
+    private Long viewCount;
+
+    private Long likeCount;
+
     private LocalDateTime auditedAt;
 
     private LocalDateTime uploadedAt;
