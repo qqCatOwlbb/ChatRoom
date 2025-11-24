@@ -2,6 +2,7 @@ package com.catowl.chatroom.service.impl;
 
 import com.catowl.chatroom.exception.BusinessException;
 import com.catowl.chatroom.exception.ExceptionEnum;
+import com.catowl.chatroom.init.BloomFilterInit;
 import com.catowl.chatroom.mapper.RoleMapper;
 import com.catowl.chatroom.mapper.UserMapper;
 import com.catowl.chatroom.model.DTO.request.LoginRequest;
@@ -15,6 +16,8 @@ import com.catowl.chatroom.utils.JwtUtil;
 import com.catowl.chatroom.utils.RedisCache;
 import com.catowl.chatroom.utils.UlidUtils;
 import io.netty.util.internal.StringUtil;
+import org.redisson.api.RBloomFilter;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -28,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.PostConstruct;
 import java.beans.Transient;
 import java.net.PasswordAuthentication;
 import java.util.UUID;
@@ -59,18 +63,34 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private RedisCache redisCache;
 
+    @Autowired
+    private RedissonClient redissonClient;
+
     @Value("${jwt.expiration.refresh-token}")
     private long refreshTokenExpirationMs;
+
+    private RBloomFilter<String> nameBloomFilter;
+
+    private RBloomFilter<Long> idBloomFilter;
 
     private static final String REFRESH_TOKEN_KEY_PREFIX = "rt:";
 
     private static final String USER_SESSIONS_KEY_PREFIX = "refresh_tokens_for_user:";
 
+    @PostConstruct
+    public void init(){
+        this.nameBloomFilter = redissonClient.getBloomFilter(BloomFilterInit.USER_NAME_BLOOM_KEY);
+        this.idBloomFilter = redissonClient.getBloomFilter(BloomFilterInit.USER_ID_BLOOM_KEY);
+    }
+
     @Override
     @Transactional
     public void register(RegisterRequest registerRequest) {
-        if(userMapper.findByUsername(registerRequest.getUsername()) != null){
-            throw new BusinessException(ExceptionEnum.USERNAME_EXISTS);
+        String username = registerRequest.getUsername();
+        if(nameBloomFilter.contains(username)){
+            if(userMapper.findByUsername(username) != null){
+                throw new BusinessException(ExceptionEnum.USERNAME_EXISTS);
+            }
         }
         User user = new User();
         user.setUlid(UlidUtils.generate());
@@ -85,6 +105,10 @@ public class AuthServiceImpl implements AuthService {
         if(defaultRole == null) {
             throw new BusinessException(ExceptionEnum.INTERNAL_SERVER_ERROR, "默认角色ROLE_USER未在数据库中定义！");
         }
+
+        // 注册加入布隆过滤器
+        nameBloomFilter.add(username);
+        idBloomFilter.add(user.getId());
 
         roleMapper.insertUserRole(newUserId,defaultRole.getId());
     }

@@ -23,4 +23,10 @@
             #{id}
         </foreach>
     </select>
+    <select id="findAllIds" resultType="java.lang.Long">
+        SELECT id FROM user_account
+    </select>
+    <select id="findAllUsernames" resultType="java.lang.String">
+        SELECT username FROM user_account
+    </select>
 </mapper>

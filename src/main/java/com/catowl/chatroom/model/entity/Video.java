@@ -23,6 +23,8 @@ public class Video extends BaseEntity{
 
     private String title;
 
+    private String description;
+
     private String videoUrl;
 
     private String coverImageUrl;

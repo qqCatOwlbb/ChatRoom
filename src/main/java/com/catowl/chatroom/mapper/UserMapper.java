@@ -33,4 +33,22 @@ public interface UserMapper {
     int insertUser(User user);
 
     List<User> selectByIds(List<Long> ids);
+    
+    /** 
+    * @Description: 用于布隆过滤器的预热
+    * @Param: []
+    * @return: java.util.List<java.lang.Long>
+    * @Author: qqCatOwlbb
+    * @Date: 2025/11/21
+    */
+    List<Long> findAllIds();
+    
+    /** 
+    * @Description: 布隆过滤器预热
+    * @Param: []
+    * @return: java.util.List<java.lang.String>
+    * @Author: qqCatOwlbb
+    * @Date: 2025/11/21
+    */
+    List<String> findAllUsernames();
 }
