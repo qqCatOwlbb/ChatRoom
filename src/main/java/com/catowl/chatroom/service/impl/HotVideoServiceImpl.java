@@ -1,5 +1,6 @@
 package com.catowl.chatroom.service.impl;
 
+import com.catowl.chatroom.model.VO.VideoFeedVO;
 import com.catowl.chatroom.service.HotVideoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -79,4 +80,5 @@ public class HotVideoServiceImpl implements HotVideoService {
     public void removeVideoFromRank(Long videoId) {
         redisTemplate.opsForZSet().remove(HOT_RANK_KEY, videoId);
     }
+
 }

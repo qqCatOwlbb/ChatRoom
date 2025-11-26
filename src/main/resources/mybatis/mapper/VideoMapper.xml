@@ -134,4 +134,56 @@
         DELETE FROM video WHERE id = #{id}
     </delete>
 
+    <select id="selectFeedVOByIds" resultType="com.catowl.chatroom.model.VO.VideoFeedVO">
+        SELECT
+        v.id as internalId
+        v.ulid as videoId,
+        v.title,
+        v.description,
+        v.video_url as videoUrl,
+        v.cover_image_url as coverImageUrl,
+        v.uploaded_at as uploadedAt,
+        u.ulid as uploaderId,
+        u.nickname as uploaderNickname,
+        u.avatar_url as uploaderAvatar
+        FROM video v
+        LEFT JOIN user_account u ON v.uploader_user_id = u.id
+        WHERE v.id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <update id="batchUpdateScores">
+        UPDATE video
+        SET view_count = CASE id
+        <foreach collection="list" item="item">
+            WHEN #{item.id} THEN #{item.viewCount}
+        </foreach>
+        END,
+        like_count = CASE id
+        <foreach collection="list" item="item">
+            WHEN #{item.id} THEN #{item.likeCount}
+        </foreach>
+        END
+        WHERE id IN
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+    </update>
+    <insert id="batchInsert">
+        INSERT IGNORE INTO user_video_like (user_id, video_id, created_at)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.userId}, #{item.videoId}, NOW())
+        </foreach>
+    </insert>
+
+    <delete id="batchDelete">
+        DELETE FROM user_video_like
+        WHERE (user_id, video_id) IN
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            (#{item.userId}, #{item.videoId})
+        </foreach>
+    </delete>
 </mapper>

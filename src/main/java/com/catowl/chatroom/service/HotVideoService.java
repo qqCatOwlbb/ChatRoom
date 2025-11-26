@@ -1,5 +1,7 @@
 package com.catowl.chatroom.service;
 
+import com.catowl.chatroom.model.VO.VideoFeedVO;
+
 import java.util.List;
 import java.util.Set;
 
@@ -35,4 +37,5 @@ public interface HotVideoService {
     * @Date: 2025/11/22
     */
     void removeVideoFromRank(Long videoId);
+
 }

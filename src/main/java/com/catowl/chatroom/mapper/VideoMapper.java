@@ -1,5 +1,6 @@
 package com.catowl.chatroom.mapper;
 
+import com.catowl.chatroom.model.DTO.request.LikeEventRequest;
 import com.catowl.chatroom.model.VO.VideoFeedVO;
 import com.catowl.chatroom.model.entity.Video;
 import org.apache.ibatis.annotations.Mapper;
@@ -70,4 +71,12 @@ public interface VideoMapper {
      * 删除视频
      */
     int deleteById(@Param("id") Long id);
+    
+    List<VideoFeedVO> selectFeedVOByIds(@Param("ids") List<Long> ids);
+
+    void batchUpdateScores(List<Video> videos);
+
+    void batchInsert(@Param("list")List<LikeEventRequest> list);
+
+    void batchDelete(@Param("list")List<LikeEventRequest> list);
 }

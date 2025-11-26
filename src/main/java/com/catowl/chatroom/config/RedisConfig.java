@@ -25,6 +25,21 @@ import org.springframework.scripting.support.ResourceScriptSource;
 
 @Configuration
 public class RedisConfig {
+    @Bean
+    public DefaultRedisScript<Long> likeToggleScript(){
+        DefaultRedisScript<Long> script = new DefaultRedisScript<>();
+        script.setScriptSource(new ResourceScriptSource(new ClassPathResource("scripts/like_toggle.lua")));
+        script.setResultType(Long.class);
+        return script;
+    }
+
+    @Bean
+    public DefaultRedisScript<Long> viewIncrScript(){
+        DefaultRedisScript<Long> script = new DefaultRedisScript<>();
+        script.setScriptSource(new ResourceScriptSource(new ClassPathResource("scripts/view_incr.lua")));
+        script.setResultType(Long.class);
+        return script;
+    }
 
     @Bean
     public DefaultRedisScript<Long> renameDirtyScript(){

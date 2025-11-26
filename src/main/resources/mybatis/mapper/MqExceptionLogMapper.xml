@@ -1,0 +1,20 @@
+<mapper namespace="com.catowl.chatroom.mapper.MqExceptionLogMapper">
+    <insert id="insertLog" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO mq_exception_log (topic, hash_key, json_content, error_msg, status, retry_count)
+        VALUES (#{topic}, #{hashKey}, #{jsonContent}, #{errorMsg}, 0, 0)
+    </insert>
+
+    <select id="selectPendingLogs" resultType="com.catowl.chatroom.model.entity.MqExceptionLog">
+        SELECT * FROM mq_exception_log
+        WHERE status = 0 AND retry_count &lt; 5
+        LIMIT 100
+    </select>
+
+    <update id="updateStatusSuccess">
+        UPDATE mq_exception_log SET status = 1 WHERE id = #{id}
+    </update>
+
+    <update id="incrementRetryCount">
+        UPDATE mq_exception_log SET retry_count = retry_count + 1 WHERE id = #{id}
+    </update>
+</mapper>
